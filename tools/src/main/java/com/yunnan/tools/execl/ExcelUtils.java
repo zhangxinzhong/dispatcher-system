@@ -134,7 +134,7 @@ public class ExcelUtils {
      * @param <T>
      * @return
      */
-    public <T> List<T> parse(InputStream inputStream, Class<?> pojoClass) {
+    public <T> List<T> parseData(InputStream inputStream, Class<?> pojoClass) {
         try {
             if (!inputStream.markSupported()) {
                 inputStream = new PushbackInputStream(inputStream, 8);
@@ -162,6 +162,39 @@ public class ExcelUtils {
     /**
      * 解析excel，返回对象列表
      *
+     * @param inputStream
+     * @param pojoClass
+     * @param <T>
+     * @return
+     */
+    public <T> Tuple2<Workbook, List<T>> parse(InputStream inputStream, Class<?> pojoClass) {
+        try {
+            if (!inputStream.markSupported()) {
+                inputStream = new PushbackInputStream(inputStream, 8);
+            }
+
+            Workbook workbook = null;
+            if (POIFSFileSystem.hasPOIFSHeader(inputStream)) {
+                workbook = new HSSFWorkbook(inputStream);
+            } else if (POIXMLDocument.hasOOXMLHeader(inputStream)) {
+                workbook = new XSSFWorkbook(OPCPackage.open(inputStream));
+            }
+            if (workbook == null)
+                throw new RuntimeException("fail to create workbook");
+
+            Sheet sheet = workbook.getSheetAt(0);
+            return new Tuple2<>(workbook, excelSupport.parse(sheet, pojoClass));
+        } catch (Exception ex) {
+            logger.error("fail to parse excel", ex);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+        return null;
+    }
+
+    /**
+     * 解析excel，返回对象列表
+     *
      * @param file
      * @param pojoClass
      * @param <T>
@@ -172,7 +205,7 @@ public class ExcelUtils {
         try {
             in = new FileInputStream(file);
 
-            return parse(in, pojoClass);
+            return parseData(in, pojoClass);
         } catch (Exception ex) {
             logger.error("fail to parse excel", ex);
         } finally {
