@@ -58,7 +58,7 @@ public class WebApplication {
     @PostConstruct
     public void init() {
         try {
-            readFile("D://a.xls");
+            readFile("D://package/data.xls");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -97,7 +97,7 @@ public class WebApplication {
         Workbook workbook = tuple2.getT1();
         excelUtils.append(workbook, "xxxxxxxx", columns, result);
         // 写入文件
-        String newFilePath = "D://数据+检尺表.xls";
+        String newFilePath = "D://package/数据+检尺表.xls";
         try (FileOutputStream outputStream = new FileOutputStream(newFilePath)) {
             workbook.write(outputStream);
         }
