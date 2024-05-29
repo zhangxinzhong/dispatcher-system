@@ -16,6 +16,7 @@
     <modules>
         <module>web</module>
         <module>privilege</module>
+        <module>tools</module>
     </modules>
     <properties>
         <java.version>1.8</java.version>
